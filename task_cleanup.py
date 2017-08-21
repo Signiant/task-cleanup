@@ -6,13 +6,14 @@ logging.getLogger('botocore').setLevel(logging.CRITICAL)
 
 
 def post_to_slack_channel(channels):
-    for channel in channels:
-        # TODO: Implement this
-        logging.debug('Calling AWS lambda to post to slack channel')
+    if channels:
+        for channel in channels:
+            # TODO: Implement this
+            logging.debug('Calling AWS lambda to post to slack channel')
     return True
 
 
-def cleanup_tasks(task_prefix, max_age, cluster_name=None, notify_list=[], region=None, profile=None, dryrun=False):
+def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], notify_list=[], region=None, profile=None, dryrun=False):
     '''
     :param task_prefix: prefix for the task name to cleanup
     :param max_age: Maximum age of the task, if > than this, kill it
@@ -64,8 +65,17 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, notify_list=[], regio
     session = boto3.session.Session(profile_name=profile, region_name=region)
     ecs = session.client('ecs')
 
-    # Get all active task defintions for the given task_prefix
+    # Get all active task defintions with the given task_prefix
     task_defs = get_active_task_defs(task_prefix)
+
+    if exclude_filters and len(exclude_filters) > 0:
+        logging.debug("Excluding task defs that contain text matching exclude_filters")
+        if task_defs:
+            # Now exclude any task defs that have any of the provided exclude_filters present in their name
+            for task_def in list(task_defs):
+                if any(filter in task_def for filter in exclude_filters):
+                    logging.debug("   Excluding: %s" % task_def)
+                    task_defs.remove(task_def)
 
     if task_defs:
         # For each task definition, get all running tasks in the cluster
@@ -111,6 +121,7 @@ if __name__ == "__main__":
     parser.add_argument("--aws-access-key-id", help="AWS Access Key ID", dest='aws_access_key', required=False)
     parser.add_argument("--aws-secret-access-key", help="AWS Secret Access Key", dest='aws_secret_key', required=False)
     parser.add_argument("--task-name-prefix", help="Prefix for task to clean up", dest='task_prefix', required=True)
+    parser.add_argument("--exclude-filters", help="exclude any task defs that contain these filters", nargs="+", dest='exclude_filters')
     parser.add_argument("--max-age", help="Max age (hours) [48]", dest='max_age', default=48, required=False)
     parser.add_argument("--cluster-name", help="Cluster name to search", dest='cluster_name', required=False)
     parser.add_argument("--notify", help="List of slack channels to notify", nargs='+', dest='notify_list')
@@ -147,7 +158,8 @@ if __name__ == "__main__":
     cleanup_tasks(task_prefix=args.task_prefix,
                   max_age=args.max_age,
                   cluster_name=args.cluster_name,
-                  region=args.region,
+                  exclude_filters=args.exclude_filters,
                   notify_list=args.notify_list,
+                  region=args.region,
                   profile=args.profile,
                   dryrun=args.dryrun)
