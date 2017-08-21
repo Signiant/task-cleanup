@@ -100,7 +100,7 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
                         running_time_hours = int(running_time_seconds//3600)
                         logging.debug('         Running for : ~%d minutes' % running_time_minutes)
                         if running_time_hours > max_age:
-                            logging.info('         *** Terminating task due to old age (> %d hours)' % max_age)
+                            logging.info('         *** Terminating task (ARN: %s) due to old age (> %d hours)' % (task, max_age))
                             reason='Killing task due to old age'
                             if not dryrun:
                                 ecs.stop_task(cluster=cluster_name, task=task, reason=reason)
