@@ -1,6 +1,8 @@
-import logging.handlers, argparse
+import logging.handlers
+import argparse
 import boto3
-import datetime, pytz
+import datetime
+import pytz
 
 logging.getLogger('botocore').setLevel(logging.CRITICAL)
 
@@ -41,7 +43,6 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
                         result.extend(query_result['families'])
         return result
 
-
     def get_tasks_with_name_in_cluster(task_name, cluster_name, next_token=None):
         '''Get the running tasks for the given task name'''
         result = []
@@ -55,12 +56,11 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
                 if query_result['ResponseMetadata']['HTTPStatusCode'] == 200:
                     if 'nextToken' in query_result:
                         result.extend(get_tasks_with_name_in_cluster(task_name=task_name,
-                                                                     cluster_name = cluster_name,
+                                                                     cluster_name=cluster_name,
                                                                      next_token=query_result['nextToken']))
                     else:
                         result.extend(query_result['taskArns'])
         return result
-
 
     session = boto3.session.Session(profile_name=profile, region_name=region)
     ecs = session.client('ecs')
@@ -96,12 +96,12 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
                         logging.debug('         Time now   (UTC): %s' % str(time_now_utc))
                         running_time = time_now_utc - start_time_utc
                         running_time_seconds = running_time.total_seconds()
-                        running_time_minutes = int(running_time_seconds//60)
-                        running_time_hours = int(running_time_seconds//3600)
+                        running_time_minutes = int(running_time_seconds // 60)
+                        running_time_hours = int(running_time_seconds // 3600)
                         logging.debug('         Running for : ~%d minutes' % running_time_minutes)
                         if running_time_hours > max_age:
                             logging.info('         *** Terminating task (ARN: %s) due to old age (> %d hours)' % (task, max_age))
-                            reason='Killing task due to old age'
+                            reason = 'Killing task due to old age'
                             if not dryrun:
                                 ecs.stop_task(cluster=cluster_name, task=task, reason=reason)
                                 post_to_slack_channel(notify_list)
