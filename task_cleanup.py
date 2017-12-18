@@ -37,6 +37,7 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
             if 'HTTPStatusCode' in query_result['ResponseMetadata']:
                 if query_result['ResponseMetadata']['HTTPStatusCode'] == 200:
                     if 'nextToken' in query_result:
+                        result.extend(query_result['families'])
                         result.extend(get_active_task_defs(task_prefix=task_prefix,
                                                            next_token=query_result['nextToken']))
                     else:
@@ -55,6 +56,7 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
             if 'HTTPStatusCode' in query_result['ResponseMetadata']:
                 if query_result['ResponseMetadata']['HTTPStatusCode'] == 200:
                     if 'nextToken' in query_result:
+                        result.extend(query_result['taskArns'])
                         result.extend(get_tasks_with_name_in_cluster(task_name=task_name,
                                                                      cluster_name=cluster_name,
                                                                      next_token=query_result['nextToken']))
