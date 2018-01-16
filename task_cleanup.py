@@ -25,6 +25,9 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
     :param dryrun: dryrun only - no changes
     '''
 
+    logging.debug('Looking for tasks with the prefix %s in the %s cluster' % (task_prefix, cluster_name))
+    logging.debug('Any tasks older than %s hours will be terminated' % max_age)
+
     def get_active_task_defs(task_prefix, next_token=None):
         '''Get the active task definitions with the given prefix'''
         result = []
@@ -70,8 +73,10 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
     # Get all active task defintions with the given task_prefix
     task_defs = get_active_task_defs(task_prefix)
 
+    logging.debug('Found the following active task defs: %s' % str(task_defs))
+
     if exclude_filters and len(exclude_filters) > 0:
-        logging.debug("Excluding task defs that contain text matching exclude_filters")
+        logging.debug("Excluding task defs that contain text matching: %s" % str(exclude_filters))
         if task_defs:
             # Now exclude any task defs that have any of the provided exclude_filters present in their name
             for task_def in list(task_defs):
