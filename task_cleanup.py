@@ -32,9 +32,9 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
         '''Get the active task definitions with the given prefix'''
         result = []
         if next_token:
-            query_result = ecs.list_task_definition_families(familyPrefix=task_prefix, status='ACTIVE', nextToken=next_token)
+            query_result = ecs.list_task_definition_families(familyPrefix=task_prefix, nextToken=next_token)
         else:
-            query_result = ecs.list_task_definition_families(familyPrefix=task_prefix, status='ACTIVE')
+            query_result = ecs.list_task_definition_families(familyPrefix=task_prefix)
 
         if 'ResponseMetadata' in query_result:
             if 'HTTPStatusCode' in query_result['ResponseMetadata']:
@@ -73,7 +73,7 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
     # Get all active task defintions with the given task_prefix
     task_defs = get_active_task_defs(task_prefix)
 
-    logging.debug('Found the following active task defs: %s' % str(task_defs))
+    logging.debug('Found the following matching task defs: %s' % str(task_defs))
 
     if exclude_filters and len(exclude_filters) > 0:
         logging.debug("Excluding task defs that contain text matching: %s" % str(exclude_filters))
