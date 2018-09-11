@@ -84,7 +84,7 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
                     logging.info('         *** Terminating task (ARN: %s) due to old age (> %d hours)' % (task_arn, max_age))
                     reason = 'Killing task due to old age'
                     if not dryrun:
-                        ecs.stop_task(cluster=cluster_name, task=task, reason=reason)
+                        ecs.stop_task(cluster=cluster_name, task=task_arn, reason=reason)
                         post_to_slack_channel(notify_list)
                     else:
                         logging.warn('         *** dryrun selected, Task will not be killed')
