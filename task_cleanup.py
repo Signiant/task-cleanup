@@ -16,20 +16,22 @@ def post_to_slack_channel(channels):
 
 
 def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], notify_list=[], region=None, profile=None, dryrun=False):
-    '''
-    :param task_prefix: prefix for the task name to cleanup
+    """
+    :param task_prefix: prefix for the task name to clean up
     :param max_age: Maximum age of the task, if > than this, kill it
     :param cluster_name: Cluster to query, if none provided, use cluster *this* instance is in
-    :param region: AWS Region to query, if none provied, use region for *this* instance
+    :param exclude_filters: exclude any tasks that match filters
+    :param notify_list: list of Slack channels to notify
+    :param region: AWS Region to query, if none provided, use region for *this* instance
     :param profile: aws cli profile to use, if none provided, use role credentials
     :param dryrun: dryrun only - no changes
-    '''
+    """
 
     logging.info('Looking for tasks with the prefix %s in the %s cluster' % (task_prefix, cluster_name))
     logging.info('Any tasks older than %s hours will be terminated' % max_age)
 
     def get_tasks_in_cluster(cluster_name, next_token=None):
-        '''Get the running tasks in the given cluster'''
+        """Get the running tasks in the given cluster"""
         result = []
         if next_token:
             query_result = ecs.list_tasks(cluster=cluster_name, nextToken=next_token)
@@ -46,7 +48,6 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
                     else:
                         result.extend(query_result['taskArns'])
         return result
-
 
     session = boto3.session.Session(profile_name=profile, region_name=region)
     ecs = session.client('ecs')
@@ -65,7 +66,7 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
             if any(filter in task_family for filter in exclude_filters):
                 logging.debug("      Excluding: the task family (%s) is in the exclude list" % task_family)
                 continue
-            if not task_prefix in task_family:
+            if task_prefix not in task_family:
                 logging.debug("      Skipping: the task family (%s) doesn't match the given prefix" % task_family)
                 continue
             if 'startedAt' in task:
@@ -91,7 +92,6 @@ def cleanup_tasks(task_prefix, max_age, cluster_name=None, exclude_filters=[], n
             else:
                 # No startedAt time - this must be just starting up - ignore it
                 logging.warn('      * no startedAt time - ignoring for now')
-
 
 
 if __name__ == "__main__":
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     fh = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=5242880, backupCount=5)
     fh.setLevel(logging.DEBUG)
     # create console handler using level set in log_level
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(stream=sys.stdout)
     ch.setLevel(log_level)
     console_formatter = logging.Formatter('%(levelname)8s: %(message)s')
     ch.setFormatter(console_formatter)
