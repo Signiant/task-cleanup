@@ -3,6 +3,7 @@ import argparse
 import boto3
 import datetime
 import pytz
+import sys
 
 logging.getLogger('botocore').setLevel(logging.CRITICAL)
 

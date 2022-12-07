@@ -1,0 +1,13 @@
+version = 0.1
+[prod]
+[prod.deploy]
+[prod.deploy.parameters]
+stack_name = "Stale-Task-Cleanup"
+s3_bucket = "<sam-deploy-bucket>"
+s3_prefix = "stale-task-cleanup"
+region = "<region>"
+confirm_changeset = false
+capabilities = "CAPABILITY_NAMED_IAM"
+parameter_overrides = [
+  "appName=Stale-Task-Cleanup"
+]

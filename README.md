@@ -12,12 +12,34 @@ the age of the task is greater than the given max-age (defaults to 48 hours).
 
 Auto-remediation FTW!
 
+# Solutions
+Two separate solutions are provided here. You can run this in a docker container (and hence schedule it as an ECS
+task) or you can run it as a lambda (and schedule the lambda run)
 
-# Prerequisites
+## Lambda based
+
+### Usage
+This tool was developed with the idea of it being run periodically. This can be accomplished using a lambda that
+is scheduled to be invoked on a periodic basis.
+
+Included here is a sample samconfig.toml file that can be filled in with appropriate values. If you would like to 
+operate on more than one cluster (eg. multiple regions) then you can modify the template.yaml and add more events
+similar to the exiting `ScheduleUsEast1` event
+
+Once all values have been filled in, you can build and deploy the lambda as follows:
+
+```bash
+cd lambda
+sam build && sam deploy --config-env prod --profile <aws_cli_profile_name>
+```
+
+## Docker based
+
+### Prerequisites
 * Docker must be installed
 * Either an AWS role (if running on EC2) or an access key/secret key
 
-# Usage
+### Usage
 
 The easiest way to run the tool is from docker (because docker rocks).
 You will need to  pass in variables specific to the ECS task you want to affect
