@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Clean up stale tasks in an ECS cluster based on given criteria
+
+Parameters:
+  appName:
+    Type: String
+    Default: 'Stale-Task-Cleanup'
+  schedule:
+    Type: String
+    Default: 'rate(1 hour)'
+
+Resources:
+  LambdaFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: !Ref appName
+      Runtime: python3.9
+      CodeUri: src/
+      Handler: task_cleanup.lambda_handler
+      Description: Clean up stale tasks in an ECS cluster based on given criteria
+      MemorySize: 128
+      Timeout: 900
+      Events:
+        ScheduleUsEast1:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref schedule
+            Input: '{"task_name_prefix":"task_prefix","exclude-filters":["filter_one","filter_two"],"cluster_name":"cluster_x","max-age":48,"region":"us-east-1"}'
+      Policies:
+        - Version: 2012-10-17
+          Statement:
+            - Effect: "Allow"
+              Action:
+                - "lambda:InvokeFunction"
+              Resource:
+                - !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${appName}'
+            # ECS Permissions
+            - Effect: "Allow"
+              Action:
+                - "ecs:DescribeTasks"
+                - "ecs:StopTask"
+              Resource:
+                - '*'
