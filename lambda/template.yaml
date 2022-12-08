@@ -38,6 +38,7 @@ Resources:
             # ECS Permissions
             - Effect: "Allow"
               Action:
+                - "ecs:ListTasks"
                 - "ecs:DescribeTasks"
                 - "ecs:StopTask"
               Resource:
