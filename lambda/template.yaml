@@ -9,6 +9,8 @@ Parameters:
   schedule:
     Type: String
     Default: 'rate(1 hour)'
+  input:
+    Type: String
 
 Resources:
   LambdaFunction:
@@ -26,7 +28,7 @@ Resources:
           Type: Schedule
           Properties:
             Schedule: !Ref schedule
-            Input: '{"task_name_prefix":"task_prefix","exclude-filters":["filter_one","filter_two"],"cluster_name":"cluster_x","max_age":48,"region":"us-east-1"}'
+            Input: !Ref input
       Policies:
         - Version: 2012-10-17
           Statement:
