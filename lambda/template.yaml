@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
 Description: Clean up stale tasks in an ECS cluster based on given criteria
+Transform: AWS::Serverless-2016-10-31
 
 Parameters:
   appName:
@@ -15,7 +15,7 @@ Resources:
     Type: 'AWS::Serverless::Function'
     Properties:
       FunctionName: !Ref appName
-      Runtime: python3.9
+      Runtime: python3.13
       CodeUri: src/
       Handler: task_cleanup.lambda_handler
       Description: Clean up stale tasks in an ECS cluster based on given criteria
